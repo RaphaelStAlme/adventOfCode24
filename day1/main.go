@@ -1,21 +1,90 @@
 package main
 
 import (
-  "fmt"
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
+func count[T any](slice []T, f func(T) bool) int {
+	count := 0
+	for _, s := range slice {
+		if f(s) {
+			count++
+		}
+	}
+	return count
+}
+
+func getDistanceDifferent(locationsID1 []int, locationsID2 []int) int {
+	//sort array in order asc
+	sort.Ints(locationsID1)
+	sort.Ints(locationsID2)
+
+	var totalDistance int
+
+	for i := range locationsID1 {
+		if locationsID1[i] < locationsID2[i] {
+			totalDistance += locationsID2[i] - locationsID1[i]
+		} else {
+			totalDistance += locationsID1[i] - locationsID2[i]
+		}
+	}
+
+	return totalDistance
+}
+
+func getSimilarityScore(locationsID1 []int, locationsID2 []int) int {
+	var similarityScore int
+
+	for _, locationID1 := range locationsID1 {
+		similarityScore += locationID1 * count(
+			locationsID2,
+			func(locationID2 int) bool {
+				return locationID2 == locationID1
+			})
+	}
+
+	return similarityScore
+}
 
 func main() {
-  //TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-  // to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-  s := "gopher"
-  fmt.Println("Hello and welcome, %s!", s)
+	file, err := os.Open("input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
-  for i := 1; i <= 5; i++ {
-	//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-	fmt.Println("i =", 100/i)
-  }
+	scanner := bufio.NewScanner(file)
+	// optionally, resize scanner's capacity for lines over 64K, see next example
+
+	var locationsID1, locationsID2 []int
+
+	for scanner.Scan() {
+		fields := strings.Fields(scanner.Text())
+
+		for i, field := range fields {
+			if intField, err := strconv.Atoi(field); err == nil {
+				if i != 0 {
+					locationsID2 = append(locationsID2, intField)
+				} else {
+					locationsID1 = append(locationsID1, intField)
+				}
+			}
+		}
+	}
+
+	// Part 1
+	// fmt.Println(getDistanceDifferent(locationsID1, locationsID2), "TotalDistance")
+
+	// Part 2
+	fmt.Println(getSimilarityScore(locationsID1, locationsID2), "Similarity score")
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
