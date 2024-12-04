@@ -53,7 +53,7 @@ func getSimilarityScore(locationsID1 []int, locationsID2 []int) int {
 }
 
 func main() {
-	file, err := os.Open("input.txt")
+	file, err := os.Open("day1/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
