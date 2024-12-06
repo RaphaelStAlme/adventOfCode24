@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -9,9 +8,11 @@ import (
 	"strconv"
 )
 
-func part1(mulRegex *regexp.Regexp, line string) int {
+func part1(fileData string) int {
+	mulRegex := regexp.MustCompile(`mul\((\d+),\s*(\d+)\)`)
+
 	var results int
-	matches := mulRegex.FindAllStringSubmatch(line, -1)
+	matches := mulRegex.FindAllStringSubmatch(fileData, -1)
 
 	fmt.Println(matches)
 
@@ -27,34 +28,26 @@ func part1(mulRegex *regexp.Regexp, line string) int {
 	return results
 }
 
-func part2(line string, lineNumber int) int {
+func part2(fileData string) int {
 	//dontRegex := regexp.MustCompile(`don't\(\)`)
 	//doRegex := regexp.MustCompile(``)
 	var results int
-	var shouldMultiply = false
-
-	if lineNumber == 0 {
-		shouldMultiply = true
-	}
+	var shouldMultiply = true
 
 	mulRegx := regexp.MustCompile(`do\(\)|don't\(\)|mul\((\d+),\s*(\d+)\)`)
 
-	matches := mulRegx.FindAllStringSubmatch(line, -1)
+	matches := mulRegx.FindAllStringSubmatch(fileData, -1)
 
 	if len(matches) > 0 {
 		for _, match := range matches {
 			matchedText := match[0]
-			fmt.Println(matchedText)
 
 			if matchedText == "do()" {
-				fmt.Println("GO IN DO()")
 				shouldMultiply = true
 			} else if matchedText == "don't()" {
-				fmt.Println("GO IN DON'T()")
 				shouldMultiply = false
 			}
 			if shouldMultiply {
-				fmt.Println("GO HERE")
 				a, _ := strconv.Atoi(match[1])
 				b, _ := strconv.Atoi(match[2])
 
@@ -63,33 +56,23 @@ func part2(line string, lineNumber int) int {
 			}
 		}
 	}
-	//response is between 59000000 and 69247082
 	return results
 }
 
 func main() {
-	file, err := os.Open("day3/input.txt")
+	fileData, err := os.ReadFile("day3/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	//mulRegx := regexp.MustCompile(`mul\((\d+),\s*(\d+)\)`)
-
-	var linesText []string
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		linesText = append(linesText, line)
-	}
+	partChoosen := 2
 
 	var results int = 0
 
-	for i, line := range linesText {
-		//results += part1(mulRegx, line)
-		fmt.Println(i, "line number")
-		results += part2(line, i)
+	if partChoosen == 1 {
+		results += part1(string(fileData))
+	} else {
+		results += part2(string(fileData))
 	}
 
 	fmt.Println(results)
